@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+    environment:
+      - AWS_REGION=us-east-2
+      - DDB_CUSTOMER_TABLE=customer_features
+
+    volumes:
+      - ${USERPROFILE}\.aws:/root/.aws:ro

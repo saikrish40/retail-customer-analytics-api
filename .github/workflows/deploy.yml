@@ -35,19 +35,32 @@ jobs:
 
       - name: Setup SSH key
         shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY_B64: ${{ secrets.EC2_SSH_KEY_B64 }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
 
-          # Write key from secret (NO extra newline issues)
-          printf '%s' "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 --decode > ~/.ssh/id_rsa
+          echo "EC2_HOST length: ${#EC2_HOST}"
+          echo "EC2_USER length: ${#EC2_USER}"
+          echo "EC2_SSH_KEY_B64 length: ${#EC2_SSH_KEY_B64}"
+
+          # Fail fast if missing
+          test -n "$EC2_HOST"
+          test -n "$EC2_USER"
+          test -n "$EC2_SSH_KEY_B64"
+
+          # Decode key
+          printf '%s' "$EC2_SSH_KEY_B64" | base64 --decode > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          # Validate key format (will fail if secret is wrong)
+          # Validate the key is actually valid
           ssh-keygen -y -f ~/.ssh/id_rsa >/dev/null
 
-          # Add host to known_hosts (avoids interactive prompt)
-          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+          # Add host key
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
       - name: Deploy on EC2 (pull latest + restart)
         env:

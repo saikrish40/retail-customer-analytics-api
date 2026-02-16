@@ -41,8 +41,7 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
-
-
+          
       - name: Deploy on EC2 (pull latest + restart)
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}

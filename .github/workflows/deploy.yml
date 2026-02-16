@@ -36,12 +36,19 @@ jobs:
       - name: Setup SSH key
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/id_rsa
+
+          # Write key from secret (NO extra newline issues)
+          printf '%s' "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 --decode > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+
+          # Validate key format (will fail if secret is wrong)
+          ssh-keygen -y -f ~/.ssh/id_rsa >/dev/null
+
+          # Add host to known_hosts (avoids interactive prompt)
           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
-          
+
       - name: Deploy on EC2 (pull latest + restart)
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}

@@ -64,7 +64,7 @@ jobs:
 
       - name: Deploy on EC2 (pull latest + restart)
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "bash -|c '
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "bash -lc '
             set -euxo pipefail
             cd /opt/retail-api
             export AWS_REGION=\"${{ secrets.AWS_REGION }}\"

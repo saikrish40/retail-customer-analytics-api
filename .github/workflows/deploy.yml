@@ -67,8 +67,12 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "bash -lc '
             set -euxo pipefail
             cd /opt/retail-api
-            AWS_REGION=${{ secrets.AWS_REGION }} AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }} REPO=retail-analytics-api ./deploy.sh
+            export AWS_REGION=\"${{ secrets.AWS_REGION }}\"
+            export AWS_ACCOUNT_ID=\"${{ secrets.AWS_ACCOUNT_ID }}\"
+            export REPO=\"retail-analytics-api\"
+            ./deploy.sh
             curl -f http://localhost/api/health
           '"
+
 
        

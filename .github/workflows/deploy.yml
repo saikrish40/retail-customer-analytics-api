@@ -71,15 +71,16 @@ jobs:
             export AWS_ACCOUNT_ID=\"${{ secrets.AWS_ACCOUNT_ID }}\"
             export REPO=\"retail-analytics-api\"
             ./deploy.sh
-            for i in {1..30}; do
+            i=1
+            while [ $i -le 30 ]; do
               if curl -fsS http://localhost/api/health > /dev/null; then
                 echo "API is healthy ✅"
                 break
               fi
               echo "Waiting for API... ($i/30)"
+              i=$((i+1))
               sleep 2
             done
-
             # final hard check (fails workflow if still not healthy)
             curl -fsS http://localhost/api/health
 

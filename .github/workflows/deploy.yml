@@ -64,13 +64,16 @@ jobs:
 
       - name: Deploy on EC2 (pull latest + restart)
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "bash -lc '
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             set -euxo pipefail
             cd /opt/retail-api
-            export AWS_REGION=\"${{ secrets.AWS_REGION }}\"
-            export AWS_ACCOUNT_ID=\"${{ secrets.AWS_ACCOUNT_ID }}\"
-            export REPO=\"retail-analytics-api\"
+
+            export AWS_REGION='${{ secrets.AWS_REGION }}'
+            export AWS_ACCOUNT_ID='${{ secrets.AWS_ACCOUNT_ID }}'
+            export REPO='retail-analytics-api'
+
             ./deploy.sh
+
             i=1
             while [ $i -le 30 ]; do
               if curl -fsS http://localhost/api/health > /dev/null; then
@@ -81,10 +84,10 @@ jobs:
               i=$((i+1))
               sleep 2
             done
-            # final hard check (fails workflow if still not healthy)
-            curl -fsS http://localhost/api/health
 
-          '"
+            curl -fsS http://localhost/api/health
+          EOF
+
 
 
        

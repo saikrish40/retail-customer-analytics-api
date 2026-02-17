@@ -63,24 +63,12 @@ jobs:
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
       - name: Deploy on EC2 (pull latest + restart)
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            set -e
-            cd ~/retail-customer-analytics-api || cd ~/retail-customer-analytics-api || true
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "bash -lc '
+            set -euxo pipefail
+            cd /opt/retail-api
+            AWS_REGION=${{ secrets.AWS_REGION }} AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }} REPO=retail-analytics-api ./deploy.sh
+            curl -f http://localhost/api/health
+          '"
 
-            aws ecr get-login-password --region ${AWS_REGION} \
-              | docker login --username AWS --password-stdin ${ECR_REGISTRY}
-
-            docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
-
-            # If you are using docker-compose on EC2:
-            cd ~/retail-customer-analytics-api
-            docker-compose pull
-            docker-compose up -d
-
-            docker image prune -f
-          EOF
+       

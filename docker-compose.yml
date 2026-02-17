@@ -1,13 +1,21 @@
 services:
-  web:
-    build: .
-    ports:
-      - "8000:8000"
+  api:
+    image: ${ECR_IMAGE}
     restart: unless-stopped
-
+    env_file:
+      - .env
     environment:
       - AWS_REGION=us-east-2
       - DDB_CUSTOMER_TABLE=customer_features
+    expose:
+      - "8000"
 
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
     volumes:
-      - ${USERPROFILE}\.aws:/root/.aws:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro

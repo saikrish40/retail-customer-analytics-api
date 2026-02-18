@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-mb!cj7&v+=k0h$40-y66b53holrfa=z0$u(_pb7ol+#-4735tg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "api.vskretailanalytics.com",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
